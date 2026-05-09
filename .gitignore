@@ -1,0 +1,21 @@
+# Build outputs
+/build/
+/out/
+/dist/
+*.class
+*.war
+
+# IDE and local server files
+/.idea/
+/.smarttomcat/
+*.iml
+
+# Duplicate/generated local web artifacts
+/WEB-INF/lib/mysql-connector-j-*/
+/WEB-INF/lib/*.jar
+/WebContent/WEB-INF/classes/
+
+# OS/editor files
+.DS_Store
+Thumbs.db
+*.log

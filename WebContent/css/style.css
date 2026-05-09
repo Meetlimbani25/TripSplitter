@@ -1,0 +1,522 @@
+/* ============================================
+   TripSplitter - Custom Stylesheet
+   Professional travel expense management theme
+   ============================================ */
+
+/* ---- CSS Variables / Color System ---- */
+:root {
+    --primary: #0d6efd;
+    --primary-dark: #0a58ca;
+    --primary-light: #e7f1ff;
+    --secondary: #6c757d;
+    --success: #198754;
+    --success-light: #d1eddf;
+    --warning: #fd7e14;
+    --warning-light: #fff3e0;
+    --danger: #dc3545;
+    --info: #0dcaf0;
+    --info-light: #cff4fc;
+    --dark: #212529;
+    --light: #f8f9fa;
+    --gray-100: #f8f9fa;
+    --gray-200: #e9ecef;
+    --gray-300: #dee2e6;
+    --gray-500: #adb5bd;
+    --gray-700: #495057;
+    --gray-900: #212529;
+    --shadow-sm: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+    --shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.1);
+    --shadow-lg: 0 1rem 3rem rgba(0, 0, 0, 0.12);
+    --radius: 0.75rem;
+    --radius-sm: 0.375rem;
+    --transition: all 0.2s ease-in-out;
+}
+
+/* ---- Base Styles ---- */
+body {
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    background-color: var(--gray-100);
+    color: var(--gray-900);
+    line-height: 1.6;
+}
+
+a {
+    transition: var(--transition);
+}
+
+/* ---- Navbar ---- */
+.navbar-dark.bg-dark {
+    background: linear-gradient(135deg, #1a2332 0%, #2c3e50 100%) !important;
+    box-shadow: var(--shadow);
+}
+
+.navbar-brand {
+    font-size: 1.4rem;
+    letter-spacing: -0.5px;
+}
+
+.navbar .nav-link {
+    font-weight: 500;
+    padding: 0.5rem 1rem !important;
+    border-radius: var(--radius-sm);
+    transition: var(--transition);
+}
+
+.navbar .nav-link:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.navbar .nav-link.active {
+    background-color: rgba(255, 255, 255, 0.15);
+}
+
+.sidebar-spacer {
+    height: 70px;
+}
+
+/* ---- Auth Pages (Login/Register) ---- */
+.auth-page {
+    background: linear-gradient(135deg, #1a2332 0%, #2c3e50 50%, #3498db 100%);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.auth-container {
+    width: 100%;
+    max-width: 440px;
+    padding: 1.5rem;
+}
+
+.auth-card {
+    background: white;
+    border-radius: var(--radius);
+    padding: 2.5rem;
+    box-shadow: var(--shadow-lg);
+}
+
+.auth-logo {
+    width: 64px;
+    height: 64px;
+    background: linear-gradient(135deg, var(--primary), #3498db);
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 1.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.auth-title {
+    font-weight: 700;
+    color: var(--dark);
+    margin-bottom: 0;
+}
+
+.auth-link {
+    color: var(--primary);
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.auth-link:hover {
+    text-decoration: underline;
+    color: var(--primary-dark);
+}
+
+/* ---- Welcome Card ---- */
+.welcome-card {
+    background: linear-gradient(135deg, #1a2332 0%, #2c3e50 100%);
+    color: white;
+    border-radius: var(--radius);
+    padding: 2rem;
+    box-shadow: var(--shadow);
+}
+
+.welcome-title {
+    font-size: 1.75rem;
+    font-weight: 700;
+    margin-bottom: 0.25rem;
+}
+
+.welcome-subtitle {
+    opacity: 0.8;
+    margin-bottom: 0;
+}
+
+/* ---- Stat Cards ---- */
+.stat-card {
+    border-radius: var(--radius);
+    padding: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    box-shadow: var(--shadow-sm);
+    transition: var(--transition);
+    border: 1px solid transparent;
+}
+
+.stat-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow);
+}
+
+.stat-card.mini {
+    padding: 1rem 1.25rem;
+}
+
+.stat-card-primary {
+    background: linear-gradient(135deg, var(--primary-light), white);
+    border-color: rgba(13, 110, 253, 0.15);
+}
+
+.stat-card-success {
+    background: linear-gradient(135deg, var(--success-light), white);
+    border-color: rgba(25, 135, 84, 0.15);
+}
+
+.stat-card-warning {
+    background: linear-gradient(135deg, var(--warning-light), white);
+    border-color: rgba(253, 126, 20, 0.15);
+}
+
+.stat-card-info {
+    background: linear-gradient(135deg, var(--info-light), white);
+    border-color: rgba(13, 202, 240, 0.15);
+}
+
+.stat-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.25rem;
+    flex-shrink: 0;
+}
+
+.stat-card-primary .stat-icon {
+    background: var(--primary);
+    color: white;
+}
+
+.stat-card-success .stat-icon {
+    background: var(--success);
+    color: white;
+}
+
+.stat-card-warning .stat-icon {
+    background: var(--warning);
+    color: white;
+}
+
+.stat-card-info .stat-icon {
+    background: var(--info);
+    color: white;
+}
+
+.stat-value {
+    font-size: 1.75rem;
+    font-weight: 700;
+    line-height: 1.2;
+    margin-bottom: 0;
+}
+
+.stat-card.mini .stat-value {
+    font-size: 1.25rem;
+}
+
+.stat-label {
+    font-size: 0.85rem;
+    color: var(--secondary);
+    margin-bottom: 0;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-weight: 600;
+}
+
+/* ---- Trip Cards ---- */
+.trip-card {
+    border-radius: var(--radius);
+    border: 1px solid var(--gray-200);
+    transition: var(--transition);
+    overflow: hidden;
+}
+
+.trip-card:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow);
+    border-color: var(--primary);
+}
+
+.trip-card .card-title {
+    font-weight: 700;
+    color: var(--dark);
+}
+
+.trip-dates {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.25rem;
+}
+
+.invite-code-box {
+    background: var(--gray-100);
+    border-radius: var(--radius-sm);
+    padding: 0.5rem 0.75rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.invite-code {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--primary);
+    letter-spacing: 1px;
+    user-select: all;
+}
+
+/* ---- Trip Header Card ---- */
+.trip-header-card {
+    background: white;
+    border-radius: var(--radius);
+    padding: 1.5rem 2rem;
+    box-shadow: var(--shadow-sm);
+    border-left: 4px solid var(--primary);
+}
+
+/* ---- Member Avatar ---- */
+.member-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--primary), #3498db);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 1rem;
+    flex-shrink: 0;
+}
+
+/* ---- Cards ---- */
+.card {
+    border-radius: var(--radius);
+    border: 1px solid var(--gray-200);
+}
+
+.card-header {
+    border-bottom: 1px solid var(--gray-200);
+    padding: 1rem 1.25rem;
+}
+
+.card-header h5 {
+    font-weight: 700;
+    color: var(--dark);
+}
+
+/* ---- Tables ---- */
+.table thead th {
+    font-weight: 600;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--secondary);
+    border-bottom-width: 1px;
+}
+
+.table tbody td {
+    vertical-align: middle;
+    padding: 0.75rem 1rem;
+}
+
+/* ---- Empty State ---- */
+.empty-state {
+    background: white;
+    border-radius: var(--radius);
+    padding: 3rem;
+}
+
+.empty-icon {
+    font-size: 4rem;
+    color: var(--gray-300);
+    display: block;
+    margin-bottom: 1rem;
+}
+
+/* ---- Buttons ---- */
+.btn {
+    border-radius: var(--radius-sm);
+    font-weight: 500;
+    transition: var(--transition);
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+    border: none;
+}
+
+.btn-primary:hover {
+    background: linear-gradient(135deg, var(--primary-dark), #084298);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-sm);
+}
+
+.btn-success {
+    background: linear-gradient(135deg, var(--success), #157347);
+    border: none;
+}
+
+.btn-success:hover {
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-sm);
+}
+
+/* ---- Forms ---- */
+.form-control, .form-select {
+    border-radius: var(--radius-sm);
+    border-color: var(--gray-300);
+    padding: 0.6rem 0.75rem;
+    transition: var(--transition);
+}
+
+.form-control:focus, .form-select:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.15);
+}
+
+.input-group-text {
+    background-color: var(--gray-100);
+    border-color: var(--gray-300);
+    color: var(--secondary);
+}
+
+/* ---- Alerts ---- */
+.alert {
+    border-radius: var(--radius-sm);
+    border: none;
+    font-weight: 500;
+}
+
+.alert-success {
+    background: var(--success-light);
+    color: #0f5132;
+}
+
+.alert-danger {
+    background: #f8d7da;
+    color: #842029;
+}
+
+.alert-info {
+    background: var(--info-light);
+    color: #055160;
+}
+
+/* ---- Badges ---- */
+.badge {
+    font-weight: 600;
+    padding: 0.35em 0.65em;
+    border-radius: 6px;
+}
+
+/* ---- Responsive ---- */
+@media (max-width: 768px) {
+    .auth-card {
+        padding: 1.5rem;
+    }
+
+    .welcome-title {
+        font-size: 1.25rem;
+    }
+
+    .stat-card {
+        padding: 1rem;
+    }
+
+    .stat-value {
+        font-size: 1.25rem;
+    }
+
+    .trip-header-card {
+        padding: 1rem;
+    }
+
+    .trip-header-card .d-flex {
+        flex-direction: column;
+    }
+
+    .sidebar-spacer {
+        height: 56px;
+    }
+}
+
+@media (max-width: 576px) {
+    .container-fluid {
+        padding-left: 0.75rem;
+        padding-right: 0.75rem;
+    }
+
+    .stat-card {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .stat-icon {
+        margin: 0 auto;
+    }
+}
+
+/* ---- Scrollbar ---- */
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--gray-100);
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--gray-300);
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--gray-500);
+}
+
+/* ---- Animations ---- */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.card, .stat-card, .trip-card {
+    animation: fadeIn 0.3s ease-out;
+}
+
+.alert {
+    animation: fadeIn 0.3s ease-out;
+}
+
+/* ---- Print Styles ---- */
+@media print {
+    .navbar, .btn, .sidebar-spacer {
+        display: none !important;
+    }
+
+    .card {
+        border: 1px solid #ddd;
+        box-shadow: none;
+    }
+
+    body {
+        background: white;
+    }
+}
