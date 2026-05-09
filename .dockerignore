@@ -1,0 +1,9 @@
+.git
+.idea
+.smarttomcat
+build
+dist
+out
+WEB-INF/lib/mysql-connector-j-*/
+*.class
+*.war
