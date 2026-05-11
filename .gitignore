@@ -19,3 +19,11 @@
 .DS_Store
 Thumbs.db
 *.log
+
+# Local secrets and database certificates
+.env
+*.pem
+*.key
+*.crt
+*.p12
+*.jks

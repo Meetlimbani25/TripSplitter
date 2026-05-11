@@ -6,7 +6,8 @@ import java.sql.SQLException;
 
 /**
  * DBConnection - Singleton class for managing database connections.
- * Uses JDBC to connect to the local MySQL database.
+ * Uses JDBC to connect to MySQL. Configure DB_URL, DB_USER, and DB_PASSWORD
+ * for hosted providers such as Aiven.
  */
 public class DBConnection {
 
@@ -23,7 +24,9 @@ public class DBConnection {
             USERNAME = System.getenv("MYSQLUSER");
             PASSWORD = System.getenv("MYSQLPASSWORD");
         } else {
-            // Fallback to our custom vars or localhost
+            // Fallback to custom vars or localhost.
+            // For Aiven MySQL, use:
+            // jdbc:mysql://HOST:PORT/DB_NAME?sslMode=REQUIRED&allowPublicKeyRetrieval=true
             URL = System.getenv("DB_URL") != null ? System.getenv("DB_URL") : "jdbc:mysql://localhost:3306/trip_splitter";
             USERNAME = System.getenv("DB_USER") != null ? System.getenv("DB_USER") : "root";
             PASSWORD = System.getenv("DB_PASSWORD") != null ? System.getenv("DB_PASSWORD") : "";

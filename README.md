@@ -110,23 +110,32 @@ TripSplitter/
 
 ### Step 2: Configure Database Connection
 
-Open `src/dao/DBConnection.java` and update the connection details:
+The app reads database settings from environment variables:
 
-**For MySQL:**
-```java
-private static final String DRIVER = "com.mysql.cj.jdbc.Driver";
-private static final String URL = "jdbc:mysql://localhost:3306/trip_splitter";
-private static final String USERNAME = "root";
-private static final String PASSWORD = "";
+```text
+DB_URL=jdbc:mysql://localhost:3306/trip_splitter
+DB_USER=root
+DB_PASSWORD=
 ```
 
-**For PostgreSQL:**
-```java
-private static final String DRIVER = "org.postgresql.Driver";
-private static final String URL = "jdbc:postgresql://host:5432/dbname";
-private static final String USERNAME = "your_username";
-private static final String PASSWORD = "your_password";
+For Aiven MySQL, copy the host, port, database name, user, and password from
+the Aiven service overview and set:
+
+```text
+DB_URL=jdbc:mysql://YOUR_AIVEN_HOST:YOUR_AIVEN_PORT/YOUR_DATABASE?sslMode=REQUIRED&allowPublicKeyRetrieval=true
+DB_USER=avnadmin
+DB_PASSWORD=YOUR_AIVEN_PASSWORD
 ```
+
+If Aiven requires CA verification, download the CA certificate to a location
+outside this repository and use:
+
+```text
+DB_URL=jdbc:mysql://YOUR_AIVEN_HOST:YOUR_AIVEN_PORT/YOUR_DATABASE?sslMode=VERIFY_CA&sslCa=E:/secure/aiven-ca.pem
+```
+
+Never commit Aiven passwords, private keys, `.pem`, `.crt`, `.key`, `.p12`, or
+`.jks` files. Use `.env.example` only as a template.
 
 ### Step 3: Eclipse Setup
 

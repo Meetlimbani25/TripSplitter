@@ -1,14 +1,16 @@
 package controller;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.math.BigDecimal;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
-import javax.servlet.ServletException;
-import javax.servlet.annotation.WebServlet;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.WebServlet;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import dao.TripDAO;
 import dao.ExpenseDAO;
 import dao.SettlementDAO;
@@ -58,8 +60,6 @@ public class ExportPdfServlet extends HttpServlet {
             response.setHeader("Content-Disposition",
                 "attachment; filename=\"" + trip.getName() + "_Report.pdf\"");
 
-            // Generate PDF using iText
-            // Note: Requires iText library in WEB-INF/lib
             generatePdf(response, trip, expenses, balances, settlements, totalExpenses);
 
         } catch (SQLException e) {
@@ -69,55 +69,154 @@ public class ExportPdfServlet extends HttpServlet {
     }
 
     /**
-     * Generate PDF report.
-     * This method uses iText library. If iText is not available,
-     * a simple text-based report is generated instead.
+     * Generate a simple valid PDF report without external libraries.
      */
     private void generatePdf(HttpServletResponse response, Trip trip,
             List<Expense> expenses, List<Balance> balances,
             List<Settlement> settlements, BigDecimal totalExpenses) throws IOException {
 
-        // Simple text-based PDF generation
-        // In production, use iText or Apache PDFBox
-        StringBuilder content = new StringBuilder();
-        content.append("TripSplitter - Trip Report\n");
-        content.append("========================\n\n");
-        content.append("Trip: ").append(trip.getName()).append("\n");
-        content.append("Destination: ").append(trip.getDestination()).append("\n");
-        content.append("Total Expenses: Rs. ").append(totalExpenses).append("\n\n");
+        List<String> lines = new ArrayList<>();
+        lines.add("TripSplitter - Trip Report");
+        lines.add("==========================");
+        lines.add("");
+        lines.add("Trip: " + valueOrEmpty(trip.getName()));
+        lines.add("Destination: " + valueOrEmpty(trip.getDestination()));
+        lines.add("Total Expenses: Rs. " + valueOrZero(totalExpenses));
+        lines.add("");
 
-        content.append("Expenses:\n");
-        content.append("---------\n");
+        lines.add("Expenses");
+        lines.add("--------");
         for (Expense exp : expenses) {
-            content.append("- ").append(exp.getTitle())
-                   .append(" | Rs. ").append(exp.getAmount())
-                   .append(" | Paid by: ").append(exp.getPaidByName())
-                   .append(" | Date: ").append(exp.getExpenseDate())
-                   .append("\n");
+            addWrappedLine(lines, "- " + valueOrEmpty(exp.getTitle())
+                    + " | Rs. " + valueOrZero(exp.getAmount())
+                    + " | Paid by: " + valueOrEmpty(exp.getPaidByName())
+                    + " | Date: " + exp.getExpenseDate());
         }
 
-        content.append("\nBalances:\n");
-        content.append("---------\n");
+        lines.add("");
+        lines.add("Balances");
+        lines.add("--------");
         for (Balance bal : balances) {
-            content.append("- ").append(bal.getUserName())
-                   .append(" | Paid: Rs. ").append(bal.getPaid())
-                   .append(" | Share: Rs. ").append(bal.getShare())
-                   .append(" | Balance: Rs. ").append(bal.getBalance())
-                   .append("\n");
+            addWrappedLine(lines, "- " + valueOrEmpty(bal.getUserName())
+                    + " | Paid: Rs. " + valueOrZero(bal.getPaid())
+                    + " | Share: Rs. " + valueOrZero(bal.getShare())
+                    + " | Balance: Rs. " + valueOrZero(bal.getBalance()));
         }
 
-        content.append("\nSettlements:\n");
-        content.append("------------\n");
+        lines.add("");
+        lines.add("Settlements");
+        lines.add("-----------");
         for (Settlement set : settlements) {
-            content.append("- ").append(set.getPayerName())
-                   .append(" owes ").append(set.getPayeeName())
-                   .append(" Rs. ").append(set.getAmount())
-                   .append(set.isSettled() ? " [SETTLED]" : " [PENDING]")
-                   .append("\n");
+            addWrappedLine(lines, "- " + valueOrEmpty(set.getPayerName())
+                    + " owes " + valueOrEmpty(set.getPayeeName())
+                    + " Rs. " + valueOrZero(set.getAmount())
+                    + (set.isSettled() ? " [SETTLED]" : " [PENDING]"));
         }
 
-        // Write as plain text (replace with iText for actual PDF)
-        response.setContentType("text/plain");
-        response.getWriter().write(content.toString());
+        byte[] pdfBytes = createPdf(lines);
+        response.setContentType("application/pdf");
+        response.setContentLength(pdfBytes.length);
+        response.getOutputStream().write(pdfBytes);
+        response.getOutputStream().flush();
+    }
+
+    private byte[] createPdf(List<String> lines) {
+        final int linesPerPage = 46;
+        int pageCount = Math.max(1, (lines.size() + linesPerPage - 1) / linesPerPage);
+        int fontObjectId = 3 + (pageCount * 2);
+
+        List<String> objects = new ArrayList<>();
+        objects.add("<< /Type /Catalog /Pages 2 0 R >>");
+
+        StringBuilder kids = new StringBuilder();
+        for (int pageIndex = 0; pageIndex < pageCount; pageIndex++) {
+            kids.append(3 + (pageIndex * 2)).append(" 0 R ");
+        }
+        objects.add("<< /Type /Pages /Kids [" + kids + "] /Count " + pageCount + " >>");
+
+        for (int pageIndex = 0; pageIndex < pageCount; pageIndex++) {
+            int pageObjectId = 3 + (pageIndex * 2);
+            int contentObjectId = pageObjectId + 1;
+            objects.add("<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] "
+                    + "/Resources << /Font << /F1 " + fontObjectId + " 0 R >> >> "
+                    + "/Contents " + contentObjectId + " 0 R >>");
+
+            String stream = createPageStream(lines, pageIndex * linesPerPage,
+                    Math.min(lines.size(), (pageIndex + 1) * linesPerPage));
+            objects.add("<< /Length " + stream.getBytes(StandardCharsets.ISO_8859_1).length
+                    + " >>\nstream\n" + stream + "endstream");
+        }
+
+        objects.add("<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>");
+        return serializePdf(objects);
+    }
+
+    private String createPageStream(List<String> lines, int start, int end) {
+        StringBuilder stream = new StringBuilder();
+        stream.append("BT\n/F1 11 Tf\n14 TL\n50 790 Td\n");
+        for (int i = start; i < end; i++) {
+            stream.append("(").append(escapePdfText(lines.get(i))).append(") Tj\nT*\n");
+        }
+        stream.append("ET\n");
+        return stream.toString();
+    }
+
+    private byte[] serializePdf(List<String> objects) {
+        StringBuilder pdf = new StringBuilder();
+        List<Integer> offsets = new ArrayList<>();
+
+        pdf.append("%PDF-1.4\n");
+        for (int i = 0; i < objects.size(); i++) {
+            offsets.add(pdf.length());
+            pdf.append(i + 1).append(" 0 obj\n")
+               .append(objects.get(i)).append("\n")
+               .append("endobj\n");
+        }
+
+        int xrefOffset = pdf.length();
+        pdf.append("xref\n0 ").append(objects.size() + 1).append("\n");
+        pdf.append("0000000000 65535 f \n");
+        for (Integer offset : offsets) {
+            pdf.append(String.format("%010d 00000 n \n", offset));
+        }
+        pdf.append("trailer\n<< /Size ").append(objects.size() + 1)
+           .append(" /Root 1 0 R >>\n")
+           .append("startxref\n").append(xrefOffset).append("\n%%EOF\n");
+
+        return pdf.toString().getBytes(StandardCharsets.ISO_8859_1);
+    }
+
+    private void addWrappedLine(List<String> lines, String text) {
+        int maxLength = 92;
+        String remaining = text;
+        while (remaining.length() > maxLength) {
+            lines.add(remaining.substring(0, maxLength));
+            remaining = "  " + remaining.substring(maxLength);
+        }
+        lines.add(remaining);
+    }
+
+    private String escapePdfText(String value) {
+        return toPdfSafeText(valueOrEmpty(value))
+                .replace("\\", "\\\\")
+                .replace("(", "\\(")
+                .replace(")", "\\)");
+    }
+
+    private String toPdfSafeText(String value) {
+        StringBuilder safe = new StringBuilder();
+        for (int i = 0; i < value.length(); i++) {
+            char ch = value.charAt(i);
+            safe.append(ch >= 32 && ch <= 126 ? ch : '?');
+        }
+        return safe.toString();
+    }
+
+    private String valueOrEmpty(Object value) {
+        return value == null ? "" : value.toString();
+    }
+
+    private String valueOrZero(BigDecimal value) {
+        return value == null ? "0.00" : value.toString();
     }
 }

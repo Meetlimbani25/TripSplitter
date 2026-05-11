@@ -30,7 +30,7 @@ CREATE TABLE IF NOT EXISTS users (
 CREATE TABLE IF NOT EXISTS trips (
     id INT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(200) NOT NULL,
-    description TEXT DEFAULT '',
+    description TEXT,
     destination VARCHAR(200) DEFAULT '',
     start_date DATE,
     end_date DATE,
@@ -63,7 +63,7 @@ CREATE TABLE IF NOT EXISTS expenses (
     id INT AUTO_INCREMENT PRIMARY KEY,
     trip_id INT NOT NULL,
     title VARCHAR(200) NOT NULL,
-    description TEXT DEFAULT '',
+    description TEXT,
     amount DECIMAL(10,2) NOT NULL,
     paid_by INT NOT NULL,
     expense_date DATE NOT NULL,
