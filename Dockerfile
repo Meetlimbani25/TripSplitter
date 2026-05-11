@@ -1,5 +1,8 @@
 FROM tomcat:10.1-jdk17-temurin
 
+# Avoid JVM container metrics startup crashes on some cloud runtimes.
+ENV CATALINA_OPTS="-XX:-UseContainerSupport"
+
 # Remove default tomcat apps
 RUN rm -rf /usr/local/tomcat/webapps/*
 
