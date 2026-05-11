@@ -3,6 +3,7 @@ package controller;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.sql.SQLException;
+import java.util.Arrays;
 import java.util.List;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -70,6 +71,7 @@ public class AddExpenseServlet extends HttpServlet {
         String paidBy = request.getParameter("paidBy");
         String expenseDate = request.getParameter("expenseDate");
         String category = request.getParameter("category");
+        String[] splitWith = request.getParameterValues("splitWith");
 
         // Validate inputs
         boolean hasError = false;
@@ -94,6 +96,11 @@ public class AddExpenseServlet extends HttpServlet {
             hasError = true;
         }
 
+        if (splitWith == null || splitWith.length == 0) {
+            request.setAttribute("splitError", "Select at least one person to split this expense");
+            hasError = true;
+        }
+
         if (hasError) {
             try {
                 List<User> members = tripDAO.getTripMembers(tripId);
@@ -104,6 +111,10 @@ public class AddExpenseServlet extends HttpServlet {
             request.setAttribute("tripId", tripId);
             request.setAttribute("expTitle", title);
             request.setAttribute("expAmount", amountStr);
+            request.setAttribute("selectedPaidBy", paidBy);
+            request.setAttribute("selectedCategory", category);
+            request.setAttribute("selectedDate", expenseDate);
+            request.setAttribute("selectedSplitWith", splitWith);
             request.getRequestDispatcher("/addExpense.jsp").forward(request, response);
             return;
         }
@@ -112,16 +123,30 @@ public class AddExpenseServlet extends HttpServlet {
             BigDecimal amount = new BigDecimal(amountStr);
             Expense expense = new Expense(tripId, title, amount, paidBy, expenseDate, category, user.getId());
 
-            if (expenseDAO.addExpense(expense)) {
+            if (expenseDAO.addExpense(expense, Arrays.asList(splitWith))) {
                 response.sendRedirect(request.getContextPath() + "/tripDetails?id=" + tripId);
             } else {
+                try {
+                    List<User> members = tripDAO.getTripMembers(tripId);
+                    request.setAttribute("members", members);
+                } catch (SQLException ignored) {
+                    // Keep the original failure message.
+                }
                 request.setAttribute("error", "Failed to add expense");
                 request.setAttribute("tripId", tripId);
+                request.setAttribute("selectedSplitWith", splitWith);
                 request.getRequestDispatcher("/addExpense.jsp").forward(request, response);
             }
         } catch (SQLException e) {
+            try {
+                List<User> members = tripDAO.getTripMembers(tripId);
+                request.setAttribute("members", members);
+            } catch (SQLException ignored) {
+                // Keep the original failure message.
+            }
             request.setAttribute("error", "Database error: " + e.getMessage());
             request.setAttribute("tripId", tripId);
+            request.setAttribute("selectedSplitWith", splitWith);
             request.getRequestDispatcher("/addExpense.jsp").forward(request, response);
         }
     }

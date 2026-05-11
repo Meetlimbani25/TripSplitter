@@ -3,6 +3,10 @@
 <%
     String tripId = (String) request.getAttribute("tripId");
     List<User> members = (List<User>) request.getAttribute("members");
+    String[] selectedSplitWith = (String[]) request.getAttribute("selectedSplitWith");
+    String selectedPaidBy = (String) request.getAttribute("selectedPaidBy");
+    String selectedCategory = (String) request.getAttribute("selectedCategory");
+    String selectedDate = (String) request.getAttribute("selectedDate");
 %>
 <%@ include file="includes/header.jsp" %>
 
@@ -50,7 +54,7 @@
                                 <option value="">-- Select Member --</option>
                                 <% if (members != null) { %>
                                     <% for (User member : members) { %>
-                                        <option value="<%= member.getId() %>"><%= member.getName() %></option>
+                                        <option value="<%= member.getId() %>" <%= member.getId().equals(selectedPaidBy) ? "selected" : "" %>><%= member.getName() %></option>
                                     <% } %>
                                 <% } %>
                             </select>
@@ -61,7 +65,8 @@
 
                         <div class="mb-3">
                             <label for="expenseDate" class="form-label">Expense Date <span class="text-danger">*</span></label>
-                            <input type="date" class="form-control" id="expenseDate" name="expenseDate" required>
+                            <input type="date" class="form-control" id="expenseDate" name="expenseDate" required
+                                   value="<%= selectedDate != null ? selectedDate : "" %>">
                             <% if (request.getAttribute("dateError") != null) { %>
                                 <div class="text-danger small mt-1"><%= request.getAttribute("dateError") %></div>
                             <% } %>
@@ -70,20 +75,51 @@
                         <div class="mb-3">
                             <label for="category" class="form-label">Category</label>
                             <select class="form-select" id="category" name="category">
-                                <option value="general">General</option>
-                                <option value="hotel">Hotel</option>
-                                <option value="food">Food</option>
-                                <option value="transport">Transport</option>
-                                <option value="tickets">Tickets</option>
-                                <option value="shopping">Shopping</option>
-                                <option value="petrol">Petrol</option>
-                                <option value="other">Other</option>
+                                <option value="general" <%= "general".equals(selectedCategory) ? "selected" : "" %>>General</option>
+                                <option value="hotel" <%= "hotel".equals(selectedCategory) ? "selected" : "" %>>Hotel</option>
+                                <option value="food" <%= "food".equals(selectedCategory) ? "selected" : "" %>>Food</option>
+                                <option value="transport" <%= "transport".equals(selectedCategory) ? "selected" : "" %>>Transport</option>
+                                <option value="tickets" <%= "tickets".equals(selectedCategory) ? "selected" : "" %>>Tickets</option>
+                                <option value="shopping" <%= "shopping".equals(selectedCategory) ? "selected" : "" %>>Shopping</option>
+                                <option value="petrol" <%= "petrol".equals(selectedCategory) ? "selected" : "" %>>Petrol</option>
+                                <option value="other" <%= "other".equals(selectedCategory) ? "selected" : "" %>>Other</option>
                             </select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Split With <span class="text-danger">*</span></label>
+                            <div class="border rounded p-3">
+                                <% if (members != null) { %>
+                                    <% for (User member : members) {
+                                        boolean checked = selectedSplitWith == null;
+                                        if (selectedSplitWith != null) {
+                                            for (String selectedId : selectedSplitWith) {
+                                                if (member.getId().equals(selectedId)) {
+                                                    checked = true;
+                                                    break;
+                                                }
+                                            }
+                                        }
+                                    %>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" name="splitWith"
+                                                   id="splitWith<%= member.getId() %>"
+                                                   value="<%= member.getId() %>" <%= checked ? "checked" : "" %>>
+                                            <label class="form-check-label" for="splitWith<%= member.getId() %>">
+                                                <%= member.getName() %>
+                                            </label>
+                                        </div>
+                                    <% } %>
+                                <% } %>
+                            </div>
+                            <% if (request.getAttribute("splitError") != null) { %>
+                                <div class="text-danger small mt-1"><%= request.getAttribute("splitError") %></div>
+                            <% } %>
                         </div>
 
                         <div class="alert alert-info">
                             <i class="bi bi-info-circle me-2"></i>
-                            Expense will be split equally among all trip members.
+                            Expense will be split equally among the selected people only.
                         </div>
 
                         <div class="d-grid gap-2">

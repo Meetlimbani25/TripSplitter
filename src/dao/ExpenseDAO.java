@@ -27,34 +27,53 @@ public class ExpenseDAO {
      * @throws SQLException on database error
      */
     public boolean addExpense(Expense expense) throws SQLException {
+        return addExpense(expense, null);
+    }
+
+    /**
+     * Add a new expense to a trip and split it among selected members.
+     * @param expense Expense object with details
+     * @param participantIds Member IDs included in the split. If null/empty, all members are used.
+     * @return true if added successfully
+     * @throws SQLException on database error
+     */
+    public boolean addExpense(Expense expense, List<String> participantIds) throws SQLException {
         String sql = "INSERT INTO expenses (trip_id, title, amount, paid_by, expense_date, category, created_by) "
                    + "VALUES (?, ?, ?, ?, ?, ?, ?)";
 
-        try (Connection conn = DBConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+        try (Connection conn = DBConnection.getConnection()) {
+            conn.setAutoCommit(false);
 
-            ps.setString(1, expense.getTripId());
-            ps.setString(2, expense.getTitle());
-            ps.setBigDecimal(3, expense.getAmount());
-            ps.setString(4, expense.getPaidBy());
-            ps.setString(5, expense.getExpenseDate());
-            ps.setString(6, expense.getCategory() != null ? expense.getCategory() : "general");
-            ps.setString(7, expense.getCreatedBy());
+            try (PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+                ps.setString(1, expense.getTripId());
+                ps.setString(2, expense.getTitle());
+                ps.setBigDecimal(3, expense.getAmount());
+                ps.setString(4, expense.getPaidBy());
+                ps.setString(5, expense.getExpenseDate());
+                ps.setString(6, expense.getCategory() != null ? expense.getCategory() : "general");
+                ps.setString(7, expense.getCreatedBy());
 
-            if (ps.executeUpdate() > 0) {
-                try (ResultSet rs = ps.getGeneratedKeys()) {
-                    if (rs.next()) {
-                        String expenseId = rs.getString(1);
+                if (ps.executeUpdate() > 0) {
+                    try (ResultSet rs = ps.getGeneratedKeys()) {
+                        if (rs.next()) {
+                            String expenseId = rs.getString(1);
 
-                        // Create equal splits for all trip members
-                        createEqualSplits(conn, expenseId, expense.getTripId(), expense.getAmount());
+                            createEqualSplits(conn, expenseId, expense.getTripId(), expense.getAmount(), participantIds);
 
-                        return true;
+                            conn.commit();
+                            return true;
+                        }
                     }
                 }
+                conn.rollback();
+                return false;
+            } catch (SQLException e) {
+                conn.rollback();
+                throw e;
+            } finally {
+                conn.setAutoCommit(true);
             }
         }
-        return false;
     }
 
     /**
@@ -66,6 +85,14 @@ public class ExpenseDAO {
      * @throws SQLException on database error
      */
     private void createEqualSplits(Connection conn, String expenseId, String tripId, BigDecimal totalAmount) throws SQLException {
+        createEqualSplits(conn, expenseId, tripId, totalAmount, null);
+    }
+
+    /**
+     * Create equal expense splits for selected trip members.
+     */
+    private void createEqualSplits(Connection conn, String expenseId, String tripId, BigDecimal totalAmount,
+            List<String> participantIds) throws SQLException {
         // Get all trip members
         String memberSql = "SELECT user_id FROM trip_members WHERE trip_id = ?";
         List<String> memberIds = new ArrayList<>();
@@ -74,12 +101,17 @@ public class ExpenseDAO {
             ps.setString(1, tripId);
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
-                    memberIds.add(rs.getString("user_id"));
+                    String memberId = rs.getString("user_id");
+                    if (participantIds == null || participantIds.isEmpty() || participantIds.contains(memberId)) {
+                        memberIds.add(memberId);
+                    }
                 }
             }
         }
 
-        if (memberIds.isEmpty()) return;
+        if (memberIds.isEmpty()) {
+            throw new SQLException("Select at least one valid trip member for the split");
+        }
 
         // Calculate per-person share
         BigDecimal share = totalAmount.divide(new BigDecimal(memberIds.size()), 2, RoundingMode.HALF_UP);
